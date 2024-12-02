@@ -46,10 +46,22 @@ export default function App() {
         setIsSorted(!isSorted);
     };
 
+    // モンスター検索処理
+    const handleMonsterSearch = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
     // 並べ替えとフィルタリング
     useEffect(() => {
         let updatedMonsters = [...monsters];
         let updatedLocations = [...locations];
+
+        // モンスター名によるフィルタリング
+        if (searchTerm) {
+            updatedMonsters = updatedMonsters.filter(monster =>
+                monster.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
 
         // カテゴリ（場所）によるフィルタリング
         if (category !== "All") {
@@ -57,16 +69,6 @@ export default function App() {
                 monster.locations.some(location => location.name === category)
             );
             updatedLocations = updatedLocations.filter(location => location.name === category);
-        }
-
-        // 検索キーワードによるフィルタリング
-        if (searchTerm) {
-            updatedMonsters = updatedMonsters.filter(monster =>
-                monster.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            updatedLocations = updatedLocations.filter(location =>
-                location.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
         }
 
         // ソート処理
@@ -132,6 +134,19 @@ export default function App() {
                             <button type="button" onClick={handleFilterClick}>Filter Locations</button>
                         </div>
                     </form>
+
+                    {/* モンスター検索 */}
+                    <div>
+                        <label htmlFor="monsterSearch">Choose a monster:</label>
+                        <input
+                            type="text"
+                            id="monsterSearch"
+                            value={searchTerm}
+                            onChange={handleMonsterSearch}
+                            placeholder="Search for a monster"
+                        />
+                    </div>
+
                     {/* 並べ替えスライダー */}
                     <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
                         <label htmlFor="sortToggle" style={{ marginRight: "10px" }}>
@@ -168,6 +183,27 @@ export default function App() {
                 </aside>
 
                 <main>
+                    {/* モンスター検索結果とロケーション */}
+                    <section>
+                        <h2>Monsters Matching "{searchTerm}"</h2>
+                        {filteredMonsters.length === 0 ? (
+                            <p>No monsters found for "{searchTerm}".</p>
+                        ) : (
+                            filteredMonsters.map((monster) => (
+                                <div key={monster.id}>
+                                    <h3>{monster.name}</h3>
+                                    <p>{monster.description}</p>
+                                    <p><strong>Locations:</strong></p>
+                                    <ul>
+                                        {monster.locations.map((location) => (
+                                            <li key={location.id}>{location.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))
+                        )}
+                    </section>
+
                     {/* Location Section */}
                     <section>
                         <h2>Location: {category}</h2>
@@ -258,64 +294,6 @@ export default function App() {
                                     ))
                             )
                         )}
-                    </section>
-                    {/* Divider between sections */}
-                    <section>
-                        <h2>Monsters by Location</h2>
-
-                        {/* Small Monsters Section */}
-                        <div>
-                            <h3
-                                style={{ cursor: "pointer", color: "#007bff" }}
-                                onClick={() => toggleMonsterType('small')}
-                            >
-                                ▸ Small Monsters ({smallMonsters.length})
-                            </h3>
-                            <div
-                                style={{
-                                    display: expandedTypes.small ? "block" : "none",
-                                    transition: "all 0.3s ease",
-                                }}
-                            >
-                                {smallMonsters.length === 0 ? (
-                                    <p>No small monsters found.</p>
-                                ) : (
-                                    smallMonsters.map((monster) => (
-                                        <div key={monster.id}>
-                                            <h4>{monster.name}</h4>
-                                            <p>{monster.description}</p>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Large Monsters Section */}
-                        <div>
-                            <h3
-                                style={{ cursor: "pointer", color: "#007bff" }}
-                                onClick={() => toggleMonsterType('large')}
-                            >
-                                ▸ Large Monsters ({largeMonsters.length})
-                            </h3>
-                            <div
-                                style={{
-                                    display: expandedTypes.large ? "block" : "none",
-                                    transition: "all 0.3s ease",
-                                }}
-                            >
-                                {largeMonsters.length === 0 ? (
-                                    <p>No large monsters found.</p>
-                                ) : (
-                                    largeMonsters.map((monster) => (
-                                        <div key={monster.id}>
-                                            <h4>{monster.name}</h4>
-                                            <p>{monster.description}</p>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
                     </section>
                 </main>
             </div>
