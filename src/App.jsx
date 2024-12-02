@@ -6,6 +6,7 @@ export default function App() {
     const [filteredMonsters, setFilteredMonsters] = useState([]);
     const [filteredLocations, setFilteredLocations] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [monsterSearchTerm, setMonsterSearchTerm] = useState("");  // モンスター検索用の新しい状態
     const [category, setCategory] = useState("All");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [expandedLocations, setExpandedLocations] = useState({});
@@ -46,22 +47,10 @@ export default function App() {
         setIsSorted(!isSorted);
     };
 
-    // モンスター検索処理
-    const handleMonsterSearch = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
     // 並べ替えとフィルタリング
     useEffect(() => {
         let updatedMonsters = [...monsters];
         let updatedLocations = [...locations];
-
-        // モンスター名によるフィルタリング
-        if (searchTerm) {
-            updatedMonsters = updatedMonsters.filter(monster =>
-                monster.name.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
 
         // カテゴリ（場所）によるフィルタリング
         if (category !== "All") {
@@ -69,6 +58,16 @@ export default function App() {
                 monster.locations.some(location => location.name === category)
             );
             updatedLocations = updatedLocations.filter(location => location.name === category);
+        }
+
+        // 検索キーワードによるフィルタリング
+        if (searchTerm) {
+            updatedMonsters = updatedMonsters.filter(monster =>
+                monster.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            updatedLocations = updatedLocations.filter(location =>
+                location.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
         }
 
         // ソート処理
@@ -80,6 +79,19 @@ export default function App() {
         setFilteredMonsters(updatedMonsters);
         setFilteredLocations(updatedLocations);
     }, [searchTerm, category, isSorted, monsters, locations]);
+
+    // モンスター検索用フィルタリング
+    const handleMonsterSearch = () => {
+        let updatedMonsters = [...monsters];
+
+        if (monsterSearchTerm) {
+            updatedMonsters = updatedMonsters.filter(monster =>
+                monster.name.toLowerCase().includes(monsterSearchTerm.toLowerCase())
+            );
+        }
+
+        setFilteredMonsters(updatedMonsters);
+    };
 
     // ロケーションの変更
     const handleCategoryChange = (e) => {
@@ -135,16 +147,17 @@ export default function App() {
                         </div>
                     </form>
 
-                    {/* モンスター検索 */}
+                    {/* モンスター検索フォーム */}
                     <div>
                         <label htmlFor="monsterSearch">Choose a monster:</label>
                         <input
-                            type="text"
                             id="monsterSearch"
-                            value={searchTerm}
-                            onChange={handleMonsterSearch}
+                            type="text"
+                            value={monsterSearchTerm}
+                            onChange={(e) => setMonsterSearchTerm(e.target.value)}
                             placeholder="Search for a monster"
                         />
+                        <button type="button" onClick={handleMonsterSearch}>Filter Monsters</button>
                     </div>
 
                     {/* 並べ替えスライダー */}
@@ -183,27 +196,6 @@ export default function App() {
                 </aside>
 
                 <main>
-                    {/* モンスター検索結果とロケーション */}
-                    <section>
-                        <h2>Monsters Matching "{searchTerm}"</h2>
-                        {filteredMonsters.length === 0 ? (
-                            <p>No monsters found for "{searchTerm}".</p>
-                        ) : (
-                            filteredMonsters.map((monster) => (
-                                <div key={monster.id}>
-                                    <h3>{monster.name}</h3>
-                                    <p>{monster.description}</p>
-                                    <p><strong>Locations:</strong></p>
-                                    <ul>
-                                        {monster.locations.map((location) => (
-                                            <li key={location.id}>{location.name}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ))
-                        )}
-                    </section>
-
                     {/* Location Section */}
                     <section>
                         <h2>Location: {category}</h2>
@@ -295,8 +287,78 @@ export default function App() {
                             )
                         )}
                     </section>
+
+                    {/* Divider between sections */}
+                    <section>
+                        <h2>Monsters by Location</h2>
+
+                        {/* Small Monsters Section */}
+                        <div>
+                            <h3
+                                style={{ cursor: "pointer", color: "#007bff" }}
+                                onClick={() => toggleMonsterType('small')}
+                            >
+                                ▸ Small Monsters ({smallMonsters.length})
+                            </h3>
+                            <div
+                                style={{
+                                    display: expandedTypes.small ? "block" : "none",
+                                    transition: "all 0.3s ease",
+                                }}
+                            >
+                                {smallMonsters.length === 0 ? (
+                                    <p>No small monsters found.</p>
+                                ) : (
+                                    smallMonsters.map((monster) => (
+                                        <div key={monster.id}>
+                                            <h3>{monster.name}</h3>
+                                            <p>{monster.description}</p>
+                                            <ul>
+                                                {monster.locations.map((location) => (
+                                                    <li key={location.id}>{location.name}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Large Monsters Section */}
+                        <div>
+                            <h3
+                                style={{ cursor: "pointer", color: "#007bff" }}
+                                onClick={() => toggleMonsterType('large')}
+                            >
+                                ▸ Large Monsters ({largeMonsters.length})
+                            </h3>
+                            <div
+                                style={{
+                                    display: expandedTypes.large ? "block" : "none",
+                                    transition: "all 0.3s ease",
+                                }}
+                            >
+                                {largeMonsters.length === 0 ? (
+                                    <p>No large monsters found.</p>
+                                ) : (
+                                    largeMonsters.map((monster) => (
+                                        <div key={monster.id}>
+                                            <h3>{monster.name}</h3>
+                                            <p>{monster.description}</p>
+                                            <ul>
+                                                {monster.locations.map((location) => (
+                                                    <li key={location.id}>{location.name}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </section>
                 </main>
             </div>
+
             <footer>
                 <div
                     style={{
