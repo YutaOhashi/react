@@ -6,14 +6,12 @@ export default function App() {
     const [filteredMonsters, setFilteredMonsters] = useState([]);
     const [filteredLocations, setFilteredLocations] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [monsterSearchTerm, setMonsterSearchTerm] = useState("");  // モンスター検索用の新しい状態
     const [category, setCategory] = useState("All");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [expandedLocations, setExpandedLocations] = useState({});
     const [expandedTypes, setExpandedTypes] = useState({ small: false, large: false });
     const [isSorted, setIsSorted] = useState(false);
 
-    // ソート前の順番を保持するための状態
     const [originalMonsters, setOriginalMonsters] = useState([]);
     const [originalLocations, setOriginalLocations] = useState([]);
 
@@ -21,9 +19,9 @@ export default function App() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [monstersResponse, locationsResponse] = await Promise.all([ 
-                    fetch("https://mhw-db.com/monsters"), 
-                    fetch("https://mhw-db.com/locations") 
+                const [monstersResponse, locationsResponse] = await Promise.all([
+                    fetch("https://mhw-db.com/monsters"),
+                    fetch("https://mhw-db.com/locations")
                 ]);
                 const monstersData = await monstersResponse.json();
                 const locationsData = await locationsResponse.json();
@@ -32,8 +30,8 @@ export default function App() {
                 setLocations(locationsData);
                 setFilteredLocations(locationsData);
                 setFilteredMonsters(monstersData);
-                setOriginalMonsters(monstersData);  // 元のモンスターリストを保存
-                setOriginalLocations(locationsData);  // 元のロケーションリストを保存
+                setOriginalMonsters(monstersData);
+                setOriginalLocations(locationsData);
             } catch (error) {
                 console.error("データの取得に失敗しました:", error);
             }
@@ -80,19 +78,6 @@ export default function App() {
         setFilteredLocations(updatedLocations);
     }, [searchTerm, category, isSorted, monsters, locations]);
 
-    // モンスター検索用フィルタリング
-    const handleMonsterSearch = () => {
-        let updatedMonsters = [...monsters];
-
-        if (monsterSearchTerm) {
-            updatedMonsters = updatedMonsters.filter(monster =>
-                monster.name.toLowerCase().includes(monsterSearchTerm.toLowerCase())
-            );
-        }
-
-        setFilteredMonsters(updatedMonsters);
-    };
-
     // ロケーションの変更
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
@@ -103,7 +88,7 @@ export default function App() {
     };
 
     const toggleLocation = (locationId) => {
-        setExpandedLocations((prevExpanded) => ({
+        setExpandedLocations(prevExpanded => ({
             ...prevExpanded,
             [locationId]: !prevExpanded[locationId],
         }));
@@ -147,25 +132,12 @@ export default function App() {
                         </div>
                     </form>
 
-                    {/* モンスター検索フォーム */}
-                    <div>
-                        <label htmlFor="monsterSearch">Choose a monster:</label>
-                        <input
-                            id="monsterSearch"
-                            type="text"
-                            value={monsterSearchTerm}
-                            onChange={(e) => setMonsterSearchTerm(e.target.value)}
-                            placeholder="Search for a monster"
-                        />
-                        <button type="button" onClick={handleMonsterSearch}>Filter Monsters</button>
-                    </div>
-
                     {/* 並べ替えスライダー */}
                     <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
                         <label htmlFor="sortToggle" style={{ marginRight: "10px" }}>
                             Sort Alphabetically:
                         </label>
-                        <span 
+                        <span
                             style={{
                                 display: "inline-block",
                                 width: "60px",
@@ -178,7 +150,7 @@ export default function App() {
                             }}
                             onClick={handleSortToggle}
                         >
-                            <span 
+                            <span
                                 style={{
                                     position: "absolute",
                                     top: "50%",
@@ -196,7 +168,6 @@ export default function App() {
                 </aside>
 
                 <main>
-                    {/* Location Section */}
                     <section>
                         <h2>Location: {category}</h2>
                         {category === "All" ? (
@@ -288,7 +259,6 @@ export default function App() {
                         )}
                     </section>
 
-                    {/* Divider between sections */}
                     <section>
                         <h2>Monsters by Location</h2>
 
@@ -312,6 +282,7 @@ export default function App() {
                                     smallMonsters.map((monster) => (
                                         <div key={monster.id}>
                                             <h3>{monster.name}</h3>
+                                            <p>{monster.species}</p>
                                             <p>{monster.description}</p>
                                             <ul>
                                                 {monster.locations.map((location) => (
@@ -344,6 +315,7 @@ export default function App() {
                                     largeMonsters.map((monster) => (
                                         <div key={monster.id}>
                                             <h3>{monster.name}</h3>
+                                            <p>{monster.species}</p>
                                             <p>{monster.description}</p>
                                             <ul>
                                                 {monster.locations.map((location) => (
@@ -358,8 +330,8 @@ export default function App() {
                     </section>
                 </main>
             </div>
-
             <footer>
+                <p><strong>引用元:</strong>https://docs.mhw-db.com/</p>
                 <div
                     style={{
                         marginTop: "30px",
